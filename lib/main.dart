@@ -23,14 +23,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _duration = "00:00";
-  String _position = "00:00";
+  String _duration = "00:00:00";
+  String _position = "00:00:00";
   Duration currentTime = Duration();
   Duration completeTime = Duration();
   AudioPlayer _audioPlayer;
-  AudioCache _audioCache;
-  int status = 0;
+  int status;
   bool isPlaying = false;
+  String filepath;
 
   @override
   void initState() {
@@ -40,12 +40,11 @@ class _HomePageState extends State<HomePage> {
 
   void initPlayer() {
     _audioPlayer = AudioPlayer();
-    _audioCache = AudioCache(fixedPlayer: _audioPlayer);
 
     _audioPlayer.onAudioPositionChanged.listen((Duration duration) {
       setState(() {
         _position = duration.toString().split(".")[0];
-        });
+      });
     });
 
     _audioPlayer.onDurationChanged.listen((Duration duration) {
@@ -84,31 +83,23 @@ class _HomePageState extends State<HomePage> {
 
   Widget _btn(IconData iconData, VoidCallback onPressed) {
     return ButtonTheme(
+      padding: EdgeInsets.all(8),
       child: Container(
         width: 45,
         height: 45,
+        margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
         child: RaisedButton(
-          padding: EdgeInsets.all(8),
           elevation: 8,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-            child: Icon(iconData),
-            color: Colors.black,
-            textColor: Colors.white,
-            onPressed: onPressed,
-            onLongPress: () {
-              _audioPlayer.stop();
-            },
-            ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          child: Icon(iconData),
+          color: Colors.black,
+          textColor: Colors.white,
+          onPressed: onPressed,
+        ),
       ),
     );
   }
-
-  // Widget onLongPressed(){
-  //     _btn(Icons.stop, () {
-  //       _audioPlayer.stop();
-  //     }),
-  // }
 
   Widget slider() {
     return Slider(
@@ -141,22 +132,26 @@ class _HomePageState extends State<HomePage> {
 
   Widget localAudio() {
     return _tab([
-      _btn(isPlaying ? Icons.pause : Icons.play_arrow, () {
-        if (isPlaying) {
-          _audioPlayer.pause();
-          setState(() {
-            isPlaying = false;
-          });
-        } else {
-          _audioPlayer.resume();
-          setState(() {
-            isPlaying = true;
-          });
-        }
-      }),
-      // _btn(Icons.play_arrow, () {
-      //   _audioCache.play('audios/LiSA_-_Gurenge.mp3');
-      // }),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _btn(Icons.skip_previous, () {}),
+          _btn(isPlaying ? Icons.pause : Icons.play_arrow, () {
+            if (isPlaying) {
+              _audioPlayer.pause();
+              setState(() {
+                isPlaying = false;
+              });
+            } else if (filepath.isNotEmpty) {
+              _audioPlayer.resume();
+              setState(() {
+                isPlaying = true;
+              });
+            }
+          }),
+          _btn(Icons.skip_next, () {}),
+        ],
+      ),
       slider(),
       timeDuration(),
     ]);
@@ -179,10 +174,8 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.audiotrack),
           onPressed: () async {
-            String filepath = await FilePicker.getFilePath();
-
+            filepath = await FilePicker.getFilePath();
             status = await _audioPlayer.play(filepath, isLocal: true);
-
             if (status == 1) {
               setState(() {
                 isPlaying = true;
