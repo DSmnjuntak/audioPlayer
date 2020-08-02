@@ -23,8 +23,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _duration = "00:00:00";
-  String _position = "00:00:00";
   Duration currentTime = Duration();
   Duration completeTime = Duration();
   AudioPlayer _audioPlayer;
@@ -41,18 +39,6 @@ class _HomePageState extends State<HomePage> {
   void initPlayer() {
     _audioPlayer = AudioPlayer();
 
-    _audioPlayer.onAudioPositionChanged.listen((Duration duration) {
-      setState(() {
-        _position = duration.toString().split(".")[0];
-      });
-    });
-
-    _audioPlayer.onDurationChanged.listen((Duration duration) {
-      setState(() {
-        _duration = duration.toString().split(".")[0];
-      });
-    });
-
     _audioPlayer.durationHandler = (d) => setState(() {
           completeTime = d;
         });
@@ -62,49 +48,10 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  Widget _tab(List<Widget> children) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.all(5.0),
-          child: Column(
-            children: children
-                .map((w) => Container(
-                      child: w,
-                      padding: EdgeInsets.all(1.0),
-                    ))
-                .toList(),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget _btn(IconData iconData, VoidCallback onPressed) {
-    return ButtonTheme(
-      padding: EdgeInsets.all(8),
-      child: Container(
-        width: 45,
-        height: 45,
-        margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-        child: RaisedButton(
-          elevation: 8,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-          child: Icon(iconData),
-          color: Colors.black,
-          textColor: Colors.white,
-          onPressed: onPressed,
-        ),
-      ),
-    );
-  }
-
   Widget slider() {
     return Slider(
-      activeColor: Colors.pink,
-      inactiveColor: Colors.grey,
+      activeColor: Colors.amber,
+      inactiveColor: Colors.black12,
       value: currentTime.inSeconds.toDouble(),
       min: 0.0,
       max: completeTime.inSeconds.toDouble(),
@@ -117,46 +64,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget timeDuration() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text("$_position"),
-          Text("$_duration"),
-        ],
-      ),
-    );
-  }
-
-  Widget localAudio() {
-    return _tab([
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          _btn(Icons.skip_previous, () {}),
-          _btn(isPlaying ? Icons.pause : Icons.play_arrow, () {
-            if (isPlaying) {
-              _audioPlayer.pause();
-              setState(() {
-                isPlaying = false;
-              });
-            } else if (filepath.isNotEmpty) {
-              _audioPlayer.resume();
-              setState(() {
-                isPlaying = true;
-              });
-            }
-          }),
-          _btn(Icons.skip_next, () {}),
-        ],
-      ),
-      slider(),
-      timeDuration(),
-    ]);
-  }
-
   void seekToSecond(int second) {
     Duration newDuration = Duration(seconds: second);
     _audioPlayer.seek(newDuration);
@@ -164,26 +71,175 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 1,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: TabBarView(children: <Widget>[
-          localAudio(),
-        ]),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.audiotrack),
-          onPressed: () async {
-            filepath = await FilePicker.getFilePath();
-            status = await _audioPlayer.play(filepath, isLocal: true);
-            if (status == 1) {
-              setState(() {
-                isPlaying = true;
-              });
-            }
-          },
+    return Stack(
+      children: <Widget>[
+        Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          color: Colors.white,
         ),
-      ),
+        Material(
+          elevation: 5,
+          shadowColor: Colors.amber,
+          child: Container(
+            height: MediaQuery.of(context).size.height / 3,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.amber,
+          ),
+        ),
+        Column(
+          children: <Widget>[
+            Spacer(
+              flex: 2,
+            ),
+            Container(
+              margin: EdgeInsets.all(5),
+              padding: EdgeInsets.all(10),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ActionButton(
+                  onPressed: () async {
+                    filepath = await FilePicker.getFilePath(
+                        allowedExtensions: ['.mp3']);
+                    status = await _audioPlayer.play(filepath, isLocal: true);
+                    if (status == 1) {
+                      setState(() {
+                        isPlaying = true;
+                      });
+                    }
+                  },
+                  iconData: Icons.add,
+                  size: 50,
+                ),
+              ),
+            ),
+            Spacer(
+              flex: 2,
+            ),
+            Center(
+                child: Material(
+              borderRadius: BorderRadius.circular(90),
+              elevation: 5,
+              child: CircleAvatar(
+                radius: 95,
+                backgroundColor: Colors.white,
+                child: CircleAvatar(
+                  radius: 90,
+                  backgroundImage:
+                      AssetImage("assets/images/LiSA_-_Gurenge.jpg"),
+                ),
+              ),
+            )),
+            Spacer(
+              flex: 2,
+            ),
+            Material(
+              textStyle: TextStyle(
+                    fontSize: 30,
+                    color: Colors.black45,
+                    fontWeight: FontWeight.w200),
+              child: Text(
+                "Title",
+              ),
+            ),
+            Spacer(
+              flex: 8,
+            ),
+            Material(
+              child: slider(),
+            ),
+            Container(
+              padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Spacer(
+                    flex: 5,
+                  ),
+                  Container(
+                    padding: EdgeInsets.fromLTRB(5, 0, 5, 5),
+                    child: ActionButton(
+                      onPressed: () {
+                        print("Previous");
+                      },
+                      iconData: Icons.skip_previous,
+                      size: 50,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.fromLTRB(5, 0, 5, 5),
+                    child: ActionButton(
+                      onPressed: () {
+                        print("Play");
+                        if (isPlaying) {
+                          _audioPlayer.pause();
+                          setState(() {
+                            isPlaying = false;
+                          });
+                        } else if (status != 1) {
+                          setState(() {
+                            _audioPlayer
+                                .play("assets/audios/LiSA_-_Gurenge.mp3");
+                          });
+                        } else {
+                          _audioPlayer.resume();
+                          setState(() {
+                            isPlaying = true;
+                          });
+                        }
+                      },
+                      iconData: (isPlaying) ? Icons.pause : Icons.play_arrow,
+                      size: 80,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.fromLTRB(5, 0, 5, 5),
+                    child: ActionButton(
+                      onPressed: () {
+                        print("Next");
+                      },
+                      iconData: Icons.skip_next,
+                      size: 50,
+                    ),
+                  ),
+                  Spacer(
+                    flex: 5,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class ActionButton extends StatelessWidget {
+  ActionButton({
+    @required this.onPressed,
+    this.iconData,
+    this.size,
+  });
+  final GestureTapCallback onPressed;
+  IconData iconData;
+  double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMaterialButton(
+      constraints: BoxConstraints.tight(Size(size, size)),
+      fillColor: Colors.white,
+      splashColor: Colors.amber,
+      elevation: 2,
+      child: Center(
+          child: Icon(
+        iconData,
+        color: Colors.amber,
+        size: size / 2,
+      )),
+      shape: StadiumBorder(),
+      onPressed: onPressed,
     );
   }
 }
