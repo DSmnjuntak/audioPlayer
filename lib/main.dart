@@ -99,8 +99,7 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.centerRight,
                 child: ActionButton(
                   onPressed: () async {
-                    filepath = await FilePicker.getFilePath(
-                        allowedExtensions: ['.mp3']);
+                    filepath = await FilePicker.getFilePath();
                     status = await _audioPlayer.play(filepath, isLocal: true);
                     if (status == 1) {
                       setState(() {
@@ -110,6 +109,8 @@ class _HomePageState extends State<HomePage> {
                   },
                   iconData: Icons.add,
                   size: 50,
+                  fillColor: Colors.white,
+                  splashColor: Colors.amber,
                 ),
               ),
             ),
@@ -135,9 +136,9 @@ class _HomePageState extends State<HomePage> {
             ),
             Material(
               textStyle: TextStyle(
-                    fontSize: 30,
-                    color: Colors.black45,
-                    fontWeight: FontWeight.w200),
+                  fontSize: 30,
+                  color: Colors.black45,
+                  fontWeight: FontWeight.w200),
               child: Text(
                 "Title",
               ),
@@ -164,6 +165,8 @@ class _HomePageState extends State<HomePage> {
                       },
                       iconData: Icons.skip_previous,
                       size: 50,
+                      fillColor: Colors.amber,
+                      splashColor: Colors.white,
                     ),
                   ),
                   Container(
@@ -190,6 +193,8 @@ class _HomePageState extends State<HomePage> {
                       },
                       iconData: (isPlaying) ? Icons.pause : Icons.play_arrow,
                       size: 80,
+                      fillColor: Colors.amber,
+                      splashColor: Colors.white,
                     ),
                   ),
                   Container(
@@ -200,6 +205,8 @@ class _HomePageState extends State<HomePage> {
                       },
                       iconData: Icons.skip_next,
                       size: 50,
+                      fillColor: Colors.amber,
+                      splashColor: Colors.white,
                     ),
                   ),
                   Spacer(
@@ -220,22 +227,26 @@ class ActionButton extends StatelessWidget {
     @required this.onPressed,
     this.iconData,
     this.size,
+    this.fillColor,
+    this.splashColor,
   });
   final GestureTapCallback onPressed;
   IconData iconData;
   double size;
+  Color fillColor;
+  Color splashColor;
 
   @override
   Widget build(BuildContext context) {
     return RawMaterialButton(
       constraints: BoxConstraints.tight(Size(size, size)),
-      fillColor: Colors.white,
-      splashColor: Colors.amber,
+      fillColor: fillColor,
+      splashColor: splashColor,
       elevation: 2,
       child: Center(
           child: Icon(
         iconData,
-        color: Colors.amber,
+        color: splashColor,
         size: size / 2,
       )),
       shape: StadiumBorder(),
