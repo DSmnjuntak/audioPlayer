@@ -118,7 +118,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Center(
                 child: Material(
-              borderRadius: BorderRadius.circular(90),
+              borderRadius: BorderRadius.circular(95),
               elevation: 5,
               child: CircleAvatar(
                 radius: 95,
