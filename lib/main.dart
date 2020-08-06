@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:characters/characters.dart';
 
 typedef void OnError(Exception exception);
 
@@ -12,7 +15,40 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: SplashScreen(),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(
+        Duration(seconds: 3),
+        () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (BuildContext context) => HomePage())));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+          child: Material(
+        borderRadius: BorderRadius.circular(95),
+        elevation: 5,
+        child: CircleAvatar(
+          radius: 95,
+          backgroundColor: Colors.grey,
+          backgroundImage: AssetImage("assets/images/eA_icon.jpg"),
+        ),
+      )),
     );
   }
 }
@@ -123,12 +159,8 @@ class _HomePageState extends State<HomePage> {
               elevation: 5,
               child: CircleAvatar(
                 radius: 95,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(
-                  radius: 90,
-                  backgroundImage:
-                      AssetImage("assets/images/LiSA_-_Gurenge.jpg"),
-                ),
+                backgroundColor: Colors.grey,
+                backgroundImage: AssetImage("assets/images/eA_icon.jpg"),
               ),
             )),
             Spacer(
@@ -140,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.black45,
                   fontWeight: FontWeight.w200),
               child: Text(
-                "Title",
+                "LiSA - Gurenge",
               ),
             ),
             Spacer(
@@ -174,20 +206,22 @@ class _HomePageState extends State<HomePage> {
                     child: ActionButton(
                       onPressed: () {
                         print("Play");
-                        if (isPlaying) {
+                        if (!isPlaying) {
+                          if (status != 1) {
+                            setState(() async {
+                              await _audioPlayer
+                                  .play("assets/audios/LiSA_-_Gurenge.mp3");
+                            });
+                          } else {
+                            _audioPlayer.resume();
+                            setState(() {
+                              isPlaying = true;
+                            });
+                          }
+                        } else {
                           _audioPlayer.pause();
                           setState(() {
                             isPlaying = false;
-                          });
-                        } else if (status != 1) {
-                          setState(() {
-                            _audioPlayer
-                                .play("assets/audios/LiSA_-_Gurenge.mp3");
-                          });
-                        } else {
-                          _audioPlayer.resume();
-                          setState(() {
-                            isPlaying = true;
                           });
                         }
                       },
